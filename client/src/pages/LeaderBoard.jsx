@@ -89,14 +89,59 @@ export default function Leaderboard() {
           margin-top: 2px;
           display: inline-block;
         }
+        /* Responsive styles */
+        @media (max-width: 900px) {
+          .card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 1rem;
+          }
+          .card > .w-8 {
+            margin-bottom: 0.5rem;
+          }
+          .card > img {
+            margin-bottom: 0.5rem;
+          }
+          .card > .flex-1 {
+            margin-bottom: 0.5rem;
+          }
+          .card > .flex-shrink-0 {
+            width: 100%;
+            margin: 0.5rem 0;
+          }
+        }
+        @media (max-width: 600px) {
+          .card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+            padding: 0.75rem;
+          }
+          .card > .w-8 {
+            font-size: 1rem;
+          }
+          .card > img {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+          }
+          .card > .flex-shrink-0 {
+            width: 100%;
+            margin: 0.25rem 0;
+          }
+          .level-badge {
+            font-size: 0.85em;
+            padding: 2px 8px;
+          }
+        }
       `}</style>
 
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-emerald-900 to-slate-900 pt-32 pb-16 px-4">
-        <div className="max-w-3xl mx-auto bg-slate-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-2xl">
-          <h1 className="text-4xl font-bold text-center text-emerald-200 mb-8 tracking-tight drop-shadow-lg">
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-emerald-900 to-slate-900 pt-32 pb-16 px-2 sm:px-4">
+        <div className="max-w-3xl mx-auto bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 sm:p-8 shadow-2xl">
+          <h1 className="text-2xl sm:text-4xl font-bold text-center text-emerald-200 mb-6 sm:mb-8 tracking-tight drop-shadow-lg">
             🌿 BinGo Leaderboard
           </h1>
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {users.map((u, i) => {
               const isCurrent = u.clerkId === user?.id;
               const percent = `${Math.floor((u.totalPoints / maxPoints) * 100)}%`;
@@ -161,3 +206,4 @@ export default function Leaderboard() {
     </>
   );
 }
+

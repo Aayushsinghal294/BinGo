@@ -286,7 +286,7 @@ const HeroSection = () => {
   const cards = [
     {
       title: "Dispose Waste",
-      icon: <Camera className='w-5 h-5 text-pink-400' />,
+      icon: <Camera className='w-4 h-4 sm:w-5 sm:h-5 text-pink-400' />,
       task: "Photo proof, instant points.",
       reward: "+50",
       gradient: "from-pink-500/20 to-rose-500/20",
@@ -294,7 +294,7 @@ const HeroSection = () => {
     },
     {
       title: "Suggest Bin",
-      icon: <MapPin className='w-5 h-5 text-blue-400' />,
+      icon: <MapPin className='w-4 h-4 sm:w-5 sm:h-5 text-blue-400' />,
       task: "Mark a new spot.",
       reward: "+30",
       gradient: "from-blue-500/20 to-cyan-500/20",
@@ -302,7 +302,7 @@ const HeroSection = () => {
     },
     {
       title: "3-Day Streak",
-      icon: <Trophy className='w-5 h-5 text-yellow-400' />,
+      icon: <Trophy className='w-4 h-4 sm:w-5 sm:h-5 text-yellow-400' />,
       task: "Log daily action.",
       reward: "+40",
       gradient: "from-yellow-500/20 to-amber-500/20",
@@ -310,7 +310,7 @@ const HeroSection = () => {
     },
     {
       title: "Sort Waste",
-      icon: <Scan className='w-5 h-5 text-green-400' />,
+      icon: <Scan className='w-4 h-4 sm:w-5 sm:h-5 text-green-400' />,
       task: "Scan & sort items.",
       reward: "+25",
       gradient: "from-green-500/20 to-emerald-500/20",
@@ -319,18 +319,18 @@ const HeroSection = () => {
   ]
 
   return (
-    <div className='relative flex flex-col lg:flex-row items-center justify-between gap-12 px-6 md:px-12 lg:px-20 xl:px-32 min-h-screen text-white overflow-hidden'>
+    <div className='relative flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 2xl:px-32 pt-30 sm:pt-24 md:pt-28 lg:pt-32 pb-8 lg:pb-12 min-h-screen text-white overflow-hidden'>
       <ParticlesBG />
       
       {/* Floating geometric shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute bottom-40 left-20 w-40 h-40 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-xl animate-pulse delay-2000"></div>
+        <div className="absolute top-20 left-4 sm:left-10 w-20 sm:w-32 h-20 sm:h-32 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-32 sm:top-40 right-4 sm:right-20 w-16 sm:w-24 h-16 sm:h-24 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-40 left-4 sm:left-20 w-24 sm:w-40 h-24 sm:h-40 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-xl animate-pulse delay-2000"></div>
       </div>
 
       {/* Left Content */}
-      <div className='flex flex-col justify-center gap-8 lg:w-1/2 z-10 relative'>
+      <div className='flex flex-col justify-center gap-6 sm:gap-8 lg:w-1/2 xl:w-3/5 z-10 relative'>
         <motion.div
           className='absolute -top-4 -left-4 w-2 h-2 bg-green-400 rounded-full animate-ping'
           initial={{ opacity: 0 }}
@@ -339,7 +339,7 @@ const HeroSection = () => {
         />
         
         <motion.h1
-          className='text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] max-w-4xl bg-gradient-to-r from-white via-green-100 to-green-200 bg-clip-text text-transparent'
+          className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] max-w-4xl bg-gradient-to-r from-white via-green-100 to-green-200 bg-clip-text text-transparent'
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 1, type: "spring", stiffness: 100 }}
@@ -352,11 +352,11 @@ const HeroSection = () => {
           >
             BinGo
             <motion.span
-              className='absolute -top-2 -right-2'
+              className='absolute -top-1 sm:-top-2 -right-1 sm:-right-2'
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             >
-              <Sparkles className='w-6 h-6 text-yellow-400' />
+              <Sparkles className='w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-yellow-400' />
             </motion.span>
           </motion.span>
         </motion.h1>
@@ -367,23 +367,23 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8 }}
         >
-          <p className='text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent mb-2'>
-            Snap, Bin, Win !!
+          <p className='text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent mb-2'>
+            Snap it . Bin it . Win it .
           </p>
-          <div className='w-24 h-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full'></div>
+          <div className='w-16 sm:w-20 lg:w-45 h-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full'></div>
         </motion.div>
 
         <motion.p
-          className='max-w-2xl text-lg md:text-xl text-gray-100/90 leading-relaxed'
+          className='max-w-2xl text-base sm:text-lg md:text-xl text-gray-100/90 leading-relaxed'
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.8 }}
         >
-          Take a live photo of your eco-action, verify through AI, and rise on the leaderboard. Make waste count and earn badges, points, and real-world rewards.
+          Take a live photo of your BinGo-action, verify through AI, and rise on the leaderboard. Make waste count and earn badges, points, and real-world rewards.
         </motion.p>
 
         <motion.button
-          className='group relative flex items-center gap-3 px-8 py-4 text-lg font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 hover:from-green-300 hover:via-emerald-300 hover:to-green-400 transition-all duration-300 rounded-2xl shadow-2xl w-max overflow-hidden'
+          className='group relative flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 hover:from-green-300 hover:via-emerald-300 hover:to-green-400 transition-all duration-300 rounded-2xl shadow-2xl w-full sm:w-max overflow-hidden'
           whileHover={{ 
             scale: 1.05, 
             boxShadow: "0 20px 40px 0 rgba(34,197,94,0.3)",
@@ -397,11 +397,11 @@ const HeroSection = () => {
         >
           <div className='absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
           <span className='relative z-10 text-gray-900'>Start Your Mission</span>
-          <ArrowRight className='relative z-10 w-6 h-6 text-gray-900 group-hover:translate-x-1 transition-transform duration-300' />
+          <ArrowRight className='relative z-10 w-5 h-5 sm:w-6 sm:h-6 text-gray-900 group-hover:translate-x-1 transition-transform duration-300' />
         </motion.button>
 
         <motion.div
-          className='flex flex-wrap gap-4 mt-8'
+          className='flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mt-6 sm:mt-8'
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.8 }}
@@ -413,22 +413,83 @@ const HeroSection = () => {
           ].map((item, i) => (
             <motion.div
               key={i}
-              className={`flex items-center gap-3 bg-gradient-to-r ${item.bg} backdrop-blur-xl px-5 py-3 rounded-2xl shadow-lg border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105`}
+              className={`flex items-center gap-2 sm:gap-3 bg-gradient-to-r ${item.bg} backdrop-blur-xl px-4 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl shadow-lg border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.4 + i * 0.1 }}
               whileHover={{ y: -2 }}
             >
-              <item.icon className={`${item.color} w-5 h-5`} />
-              <span className='text-sm font-medium'>{item.text}</span>
+              <item.icon className={`${item.color} w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0`} />
+              <span className='text-xs sm:text-sm font-medium whitespace-nowrap'>{item.text}</span>
             </motion.div>
           ))}
         </motion.div>
       </div>
 
-      {/* Right Grid */}
+      {/* Right Grid - Mobile version */}
       <motion.div
-        className="lg:w-2/5 hidden lg:grid grid-cols-2 gap-6 relative z-10"
+        className="lg:hidden grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-lg mx-auto mt-8 z-10"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 1.4, duration: 0.8 }}
+      >
+        {cards.map((card, i) => (
+          <motion.div
+            key={i}
+            className={`group relative bg-gradient-to-br ${card.gradient} backdrop-blur-2xl p-4 rounded-2xl shadow-2xl w-full h-48 sm:h-56 flex flex-col justify-between border border-white/20 hover:border-white/30 transition-all duration-500 overflow-hidden`}
+            whileHover={{ 
+              y: -8, 
+              boxShadow: "0 25px 50px 0 rgba(0,0,0,0.25)",
+              scale: 1.02
+            }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              delay: 1.6 + i * 0.15, 
+              duration: 0.8, 
+              type: "spring",
+              stiffness: 100
+            }}
+          >
+            <div className={`absolute inset-0 bg-gradient-to-r ${card.borderGradient} rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-sm`}></div>
+            
+            <div className='absolute top-3 right-3 w-1.5 h-1.5 bg-white/40 rounded-full animate-pulse'></div>
+            <div className='absolute top-5 right-5 w-1 h-1 bg-white/60 rounded-full animate-pulse delay-500'></div>
+            
+            <div className='relative z-10'>
+              <div className='flex items-center gap-2 mb-3'>
+                <div className={`p-1.5 rounded-lg bg-gradient-to-r ${card.borderGradient} bg-opacity-20`}>
+                  {card.icon}
+                </div>
+                <h3 className="text-sm sm:text-base font-bold text-white leading-tight">{card.title}</h3>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-100/80 leading-relaxed">{card.task}</p>
+            </div>
+            
+            <div className='relative z-10 flex justify-between items-end mt-4'>
+              <div className='flex items-center gap-1'>
+                <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-yellow-300 to-amber-300 bg-clip-text text-transparent">
+                  {card.reward}
+                </span>
+                <span className='text-xs text-yellow-200/60'>pts</span>
+              </div>
+              <motion.button
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r ${card.borderGradient} text-xs sm:text-sm font-bold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-gray-900 relative overflow-hidden group/btn`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/missions')}
+              >
+                <div className='absolute inset-0 bg-white/20 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500'></div>
+                <span className='relative z-10'>Join</span>
+              </motion.button>
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Right Grid - Desktop version */}
+      <motion.div
+        className="hidden lg:grid grid-cols-2 gap-6 lg:w-2/5 xl:w-2/5 relative z-10"
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 1.4, duration: 1, type: "spring", stiffness: 60 }}
@@ -451,10 +512,8 @@ const HeroSection = () => {
               stiffness: 100
             }}
           >
-            {/* Gradient border effect */}
             <div className={`absolute inset-0 bg-gradient-to-r ${card.borderGradient} rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-sm`}></div>
             
-            {/* Floating particles effect */}
             <div className='absolute top-4 right-4 w-2 h-2 bg-white/40 rounded-full animate-pulse'></div>
             <div className='absolute top-8 right-8 w-1 h-1 bg-white/60 rounded-full animate-pulse delay-500'></div>
             

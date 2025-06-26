@@ -245,7 +245,7 @@ const percentage = (score !== null && questions.length > 0)
             </h2>
             <p className="text-slate-400 text-xl leading-relaxed">
               {isGoodScore 
-                ? 'You\'re an eco-warrior! Your environmental knowledge is impressive.'
+                ? 'You\'re an BinGo-warrior! Your environmental knowledge is impressive.'
                 : 'Keep learning about sustainability. Every step counts!'
               }
             </p>

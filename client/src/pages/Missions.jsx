@@ -30,7 +30,7 @@ const funFacts = [
   "🌱 Composting food waste reduces methane emissions from landfills.",
   "📍 Suggesting new bin locations helps keep your city cleaner!",
   "🌍 Every small action counts towards a greener planet.",
-  "🤖 AI detection helps prevent fake submissions and ensures authentic eco-actions.",
+  "🤖 AI detection helps prevent fake submissions and ensures authentic BinGo-actions.",
   "🔍 Our duplicate detection system ensures fair play for all users."
 ]
 
@@ -45,7 +45,10 @@ const Missions = () => {
 
   const missions = userData?.missions || []
   const userMissions = userData?.userMissions || [];
+  
+  const userProfile = userData?.user || {}
   console.log(userMissions)
+
   const [selectedMission, setSelectedMission] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [modalType, setModalType] = useState('upload')
@@ -235,7 +238,7 @@ refreshUserData();
       })
       if (aiData.ai_generated && aiData.confidence > 0.7) {
         setStepStatus(s => ({ ...s, ai: 'fail' }))
-        setError(`❌ AI-Generated Image Detected!\n\nThis image appears to be artificially generated with ${(aiData.confidence * 100).toFixed(1)}% confidence.\n\nFor fair play, please upload authentic photos of your actual eco-actions.`)
+        setError(`❌ AI-Generated Image Detected!\n\nThis image appears to be artificially generated with ${(aiData.confidence * 100).toFixed(1)}% confidence.\n\nFor fair play, please upload authentic photos of your actual BinGo-actions.`)
         setUploadStatus('')
         setLoading(false)
         return
@@ -330,11 +333,9 @@ refreshUserData();
     setStepStatus({ ai: null, duplicate: null, face: null })
   }
 
-  const totalPoints = userMissions.reduce(
-  (sum, m) => sum + (m.completions ? m.completions.reduce((s, c) => s + (c.pointsEarned || 0), 0) : 0),
-  0
-)
 
+  const totalPoints = userProfile.totalPoints || 0
+  
   const streakDays = userMissions.find(m => m.missionId === 3 && m.completed)
     ? 3
     : userMissions.find(m => m.missionId === 3)
@@ -449,10 +450,10 @@ refreshUserData();
 
           {/* Header */}
           <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 mb-4 text-center">
-            Eco Missions
+            BinGo Missions
           </h1>
           <p className="text-xl text-gray-300 mb-6 text-center max-w-2xl">
-            Complete eco-missions, earn rewards, and make a positive impact on the environment!
+            Complete BinGo missions, earn rewards, and make a positive impact on the environment!
           </p>
 
           {/* Fun Fact Ticker */}

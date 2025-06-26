@@ -4,26 +4,22 @@ import { useUserData } from '../context/userDataContext'
 
 
 const REWARDS = [
-  { id: 1, name: "Eco-Friendly Tote Bag", cost: 15, description: "Sustainable cotton tote for your daily needs", icon: "🛍️", popular: false },
-  { id: 2, name: "Reusable Water Bottle", cost: 10, description: "Keep hydrated while saving the planet", icon: "💧", popular: true },
-  { id: 3, name: "Plant a Tree in Your Name", cost: 15, description: "Make a lasting environmental impact", icon: "🌳", popular: false },
-  { id: 4, name: "Discount Coupon", cost: 20, description: "20% off on eco-friendly products", icon: "🎟️", popular: true }
+  { id: 1, name: "Eco-Friendly Tote Bag", cost: 25, description: "Sustainable cotton tote for your daily needs", icon: "🛍️", popular: false },
+  { id: 2, name: "Reusable Water Bottle", cost: 30, description: "Keep hydrated while saving the planet", icon: "💧", popular: true },
+  { id: 3, name: "Plant a Tree in Your Name", cost: 35, description: "Make a lasting environmental impact", icon: "🌳", popular: false },
+  { id: 4, name: "Discount Coupon", cost: 40, description: "20% off on eco-friendly products", icon: "🎟️", popular: true }
 ]
 
+const API_URL = 'http://localhost:4000/api/rewards'
 const Rewards = () => {
  
-    const { userData, refreshUserData } = useUserData()
+  const { userData, refreshUserData } = useUserData()
   const userMissions = userData?.userMissions || []
 
   // Calculate total and available points
-  const totalPoints = userMissions.reduce(
-    (sum, m) => sum + (m.completions ? m.completions.reduce((s, c) => s + (c.pointsEarned || 0), 0) : 0),
-    0
-  )
+  const totalPoints = Number(userData?.user?.totalPoints) || 0
   const [redeemed, setRedeemed] = useState([]) // [{rewardId, name, cost}]
-  const pointsSpent = redeemed.reduce((sum, r) => sum + r.cost, 0)
-  const pointsLeft = totalPoints - pointsSpent
-
+  const pointsSpent = redeemed.reduce((sum, r) => sum + (Number(r.cost) || 0), 0)
 
   // Animation states
   const [animatePoints, setAnimatePoints] = useState(false)
@@ -44,6 +40,32 @@ const Rewards = () => {
     setAnimatePoints(true)
   }, [])
 
+useEffect(() => {
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch(`${API_URL}/history?clerkId=${userData?.user?.clerkId}`)
+      const data = await res.json()
+      if (res.ok) {
+        const formatted = (data.redeemedRewards || []).map(r => ({
+          name: r.rewardName,
+          cost: r.pointsUsed,
+          redeemedAt: new Date(), // No timestamp in backend, so default to now
+          type: 'reward'
+        }))
+        setRedeemed(formatted)
+      } else {
+        console.error('Error fetching history:', data.error)
+      }
+    } catch (err) {
+      console.error('Error fetching reward history:', err)
+    }
+  }
+
+  if (userData?.user?.clerkId) {
+    fetchHistory()
+  }
+}, [userData])
+
   const addNotification = (message, type = 'success') => {
     const id = Date.now()
     setNotifications(prev => [...prev, { id, message, type }])
@@ -53,22 +75,46 @@ const Rewards = () => {
   }
 
   // Redeem handler with animations
-  const handleRedeem = (reward) => {
-    if (pointsLeft < reward.cost) {
+  const handleRedeem = async(reward) => {
+    if (totalPoints < reward.cost) {
       addNotification('Not enough points to redeem this reward!', 'error')
       return
     }
     
-    setPulsingReward(reward.id)
-    setShowConfetti(true)
-    
-    setTimeout(() => {
+  setPulsingReward(reward.id)
+  setShowConfetti(true)
+
+  try {
+    const res = await fetch(`${API_URL}/redeem`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clerkId: userData?.user?.clerkId,
+        rewardName: reward.name,
+        pointsRequired: reward.cost,
+        description: reward.description
+      })
+    })
+
+    const data = await res.json()
+    console.log(data)
+    if (res.ok) {
       setRedeemed([...redeemed, { ...reward, redeemedAt: new Date() }])
       addNotification(`Successfully redeemed ${reward.name}!`, 'success')
+      refreshUserData() // make sure total points are updated
+    } else {
+      addNotification(data.message || 'Something went wrong', 'error')
+    }
+  } catch (err) {
+    console.error(err)
+    addNotification('Failed to redeem reward. Try again.', 'error')
+  } finally {
+    setTimeout(() => {
       setPulsingReward(null)
       setShowConfetti(false)
     }, 1000)
   }
+}
 
   // Transaction handler with validation
   const handleSend = () => {
@@ -82,7 +128,7 @@ const Rewards = () => {
       setTxStatus('error')
       return
     }
-    if (Number(sendAmount) > pointsLeft) {
+    if (Number(sendAmount) > totalPoints) {
       setTxMessage('Insufficient points.')
       setTxStatus('error')
       return
@@ -114,8 +160,8 @@ const Rewards = () => {
   }
 
   const getPointsColor = () => {
-    if (pointsLeft > 200) return 'text-emerald-300'
-    if (pointsLeft > 50) return 'text-amber-300'
+    if (totalPoints > 200) return 'text-emerald-300'
+    if (totalPoints > 50) return 'text-amber-300'
     return 'text-red-300'
   }
 
@@ -188,7 +234,7 @@ const Rewards = () => {
               <div className="flex items-center gap-2">
                 <div className="text-emerald-200">Available:</div>
                 <div className={`font-bold text-xl ${getPointsColor()} transition-colors duration-500`}>
-                  {pointsLeft.toLocaleString()}
+                  {totalPoints.toLocaleString()}
                 </div>
               </div>
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
@@ -261,10 +307,10 @@ const Rewards = () => {
                         <div className="text-xs text-gray-400">points required</div>
                       </div>
                       <button
-                        disabled={pointsLeft < reward.cost || pulsingReward === reward.id}
+                        disabled={totalPoints < reward.cost || pulsingReward === reward.id}
                         onClick={() => handleRedeem(reward)}
                         className={`w-full py-3 px-4 rounded-xl font-semibold shadow-lg transition-all duration-300 transform ${
-                          pointsLeft < reward.cost 
+                          totalPoints < reward.cost 
                             ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 cursor-not-allowed' 
                             : pulsingReward === reward.id
                             ? 'bg-gradient-to-r from-emerald-400 to-green-400 text-white animate-pulse'
@@ -276,7 +322,7 @@ const Rewards = () => {
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                             Redeeming...
                           </div>
-                        ) : pointsLeft < reward.cost ? (
+                        ) : totalPoints < reward.cost ? (
                           "Insufficient Points"
                         ) : (
                           "Redeem Now"
@@ -314,7 +360,7 @@ const Rewards = () => {
                       value={sendAmount}
                       onChange={e => setSendAmount(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl bg-gray-700/50 text-white border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 backdrop-blur-sm"
-                      max={pointsLeft}
+                      max={totalPoints}
                     />
                   </div>
                   <div className="flex items-end">
@@ -384,7 +430,7 @@ const Rewards = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-amber-300 font-bold">-{item.cost.toLocaleString()} pts</div>
+                        <div className="text-amber-300 font-bold">-{item.cost} pts</div>
                         <div className={`text-xs px-2 py-1 rounded-full ${
                           item.type === 'transfer' ? 'bg-blue-500/20 text-blue-300' : 'bg-emerald-500/20 text-emerald-300'
                         }`}>
