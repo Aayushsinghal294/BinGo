@@ -407,9 +407,9 @@ const HeroSection = () => {
           transition={{ delay: 1.2, duration: 0.8 }}
         >
           {[
-            { icon: Users, text: "5,000+ Users Joined", color: "text-green-300", bg: "from-green-400/10 to-emerald-400/10" },
-            { icon: Gift, text: "12,300 Rewards Claimed", color: "text-yellow-300", bg: "from-yellow-400/10 to-amber-400/10" },
-            { icon: Leaf, text: "18 Tons Waste Collected", color: "text-lime-300", bg: "from-lime-400/10 to-green-400/10" }
+            { icon: Users, text: "Check Your Rank", color: "text-green-300", bg: "from-green-400/10 to-emerald-400/10", path: "/leaderboard" },
+            { icon: Gift, text: "Redeem Your Rewards", color: "text-yellow-300", bg: "from-yellow-400/10 to-amber-400/10", path: "/rewards" },
+            { icon: Leaf, text: "Daily Quest", color: "text-lime-300", bg: "from-lime-400/10 to-green-400/10", path: "/daily-quest" }
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -418,7 +418,11 @@ const HeroSection = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.4 + i * 0.1 }}
               whileHover={{ y: -2 }}
-            >
+      onClick={() => navigate(item.path)}
+      tabIndex={0}
+      role="button"
+      onKeyPress={e => { if (e.key === 'Enter') navigate(item.path) }}
+    >
               <item.icon className={`${item.color} w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0`} />
               <span className='text-xs sm:text-sm font-medium whitespace-nowrap'>{item.text}</span>
             </motion.div>

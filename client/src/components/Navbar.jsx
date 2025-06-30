@@ -48,11 +48,21 @@ return (
             Login
           </button>
         ) : (
+          <>
           <UserButton>
             <UserButton.MenuItems>
               <UserButton.Action label='Invite Friends' labelIcon={<GiftIcon width={15} />} onClick={() => navigate('/invitation-form')} />
             </UserButton.MenuItems>
           </UserButton>
+            <button
+              onClick={() => navigate('/invitation-form')}
+              className='flex items-center gap-2 px-4 py-1 sm:px-5 sm:py-2  transition bg-green-950/80 md:bg-white/10 rounded-full font-medium text-white md:border border-gray-300/20 cursor-pointer shadow'
+              style={{ marginLeft: '8px' }}
+            >
+              <GiftIcon width={18} />
+              Invite
+            </button>
+         </> 
         )
       }
     </div>
