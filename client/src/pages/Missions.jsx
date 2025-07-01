@@ -10,7 +10,7 @@ import { completeMission } from '../services/MissionsService'
 
 const CLOUDINARY_UPLOAD_PRESET = 'BinGo_CodePaglus'
 const CLOUDINARY_CLOUD_NAME = 'dgclo6bft'
-const BACKEND_URL = 'http://127.0.0.1:5000'
+const BACKEND_URL = 'http://127.0.0.1:8000'
 
 const missionIcons = {
   "Dispose Waste": <CameraIcon className="w-6 h-6 text-emerald-400" />,
@@ -221,6 +221,23 @@ refreshUserData();
 
       const cloudinaryData = await cloudinaryResponse.json()
       const uploadedUrl = cloudinaryData.secure_url
+
+
+
+
+ setUploadStatus('Checking for dustbin/trash object...')
+    const dustbinRes = await fetch(`${BACKEND_URL}/detect_dustbin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image_url: uploadedUrl })
+    })
+    const dustbinData = await dustbinRes.json()
+    if (!dustbinData.dustbin_detected) {
+      setError("🗑️ No dustbin or accepted object detected!\n\nPlease ensure a dustbin, bucket, bottle, cup, or similar object is clearly visible in your photo.")
+      setUploadStatus('')
+      setLoading(false)
+      return
+    }
 
       // Step 1: AI Detection
       setUploadStatus('Running AI detection...')

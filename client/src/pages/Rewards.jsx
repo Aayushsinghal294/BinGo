@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Gift, ArrowDownCircle, ArrowUpCircle, Coins, Trophy, Sparkles, CheckCircle, XCircle, History, Star } from 'lucide-react'
+import { Gift, ArrowUpCircle, Coins, Trophy, Sparkles, CheckCircle, XCircle, History, Star } from 'lucide-react'
 import { useUserData } from '../context/userDataContext'
 
 
@@ -14,7 +14,6 @@ const API_URL = 'http://localhost:4000/api/rewards'
 const Rewards = () => {
  
   const { userData, refreshUserData } = useUserData()
-  const userMissions = userData?.userMissions || []
 
   // Calculate total and available points
   const totalPoints = Number(userData?.user?.totalPoints) || 0

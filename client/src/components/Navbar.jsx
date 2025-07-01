@@ -8,7 +8,6 @@ import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
 const Navbar = () => {
 const [isOpen, setIsOpen] = useState(false)
 const { user } = useUser()
-const { openSignIn } = useClerk()
 const navigate = useNavigate()
 
   useEffect(() => {
@@ -45,13 +44,13 @@ return (
     <div className='flex items-center gap-4'>
       {
         !user ? (
-          <button onClick={openSignIn} className='px-4 py-1 sm:px-7 sm:py-2 bg-green-600 hover:bg-green-500 transition rounded-full font-medium text-white cursor-pointer'>
+          <button onClick={() => navigate('/sign-in')} className='px-4 py-1 sm:px-7 sm:py-2 bg-green-600 hover:bg-green-500 transition rounded-full font-medium text-white cursor-pointer'>
             Login
           </button>
         ) : (
           <UserButton>
             <UserButton.MenuItems>
-              <UserButton.Action label='My Rewards' labelIcon={<GiftIcon width={15} />} onClick={() => navigate('/my-rewards')} />
+              <UserButton.Action label='Invite Friends' labelIcon={<GiftIcon width={15} />} onClick={() => navigate('/invitation-form')} />
             </UserButton.MenuItems>
           </UserButton>
         )

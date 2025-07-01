@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.32.0",
+    "@emailjs/browser": "^4.4.1",
     "@react-google-maps/api": "^2.20.7",
     "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.10.0",

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { 
   GiftIcon, 
-  LeafIcon, 
-  TrophyIcon, 
+  LeafIcon,  
   CameraIcon, 
   SparklesIcon, 
   UserIcon, 
@@ -12,24 +11,17 @@ import {
   CalendarIcon, 
   EarthIcon,
   CheckCircle,
-  Star,
   Target,
   Zap,
   Award,
   TrendingUp,
   Flame,
-  BarChart3,
   Medal,
   Crown,
-  Calendar,
   Activity,
   Recycle,
-  MapPin,
   Clock,
-  Sparkle,
-  Shield,
   Trophy,
-  Users,
   Heart
 } from 'lucide-react'
 import ProfilePopup from '../components/ProfilePopup'
@@ -65,7 +57,6 @@ const Dashboard = () => {
   const statistics = userProfile.statistics || {}
   const level = userProfile.level || 1
   const totalPoints = userProfile.totalPoints || 0
-  const nextLevelPoints = level * 100
   const currentLevelProgress = totalPoints % 100
   const progressPercentage = (currentLevelProgress / 100) * 100
 

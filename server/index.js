@@ -8,7 +8,6 @@ import analyzeImageRoutes from './routes/analyzeImage.js'
 import dustbinRoutes from './routes/dustbin.js'
 import missionsRouter from './routes/missions.js'
 import dailyQuestRoutes from './routes/dailyQuest.js';
-import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
 import rewardsRoute from './routes/rewards.js'
 import leaderboardRoutes from './routes/leaderboard.js'
 
@@ -160,7 +159,6 @@ app.listen(PORT, () => {
   console.log(`  - Chat with AI: ${!!process.env.GOOGLE_API_KEY}`)
   console.log(`  - Image Analysis: ${!!process.env.GOOGLE_API_KEY}`)
   console.log(`  - Dustbin Mapping: true`)
-  console.log(`  - Mission System: ${mongoose.connection.readyState === 1}`)
 })
 
 // Graceful shutdown

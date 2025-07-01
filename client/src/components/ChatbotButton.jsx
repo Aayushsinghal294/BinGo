@@ -18,7 +18,6 @@ const ChatbotButton = () => {
   const fileInputRef = useRef(null)
   const messagesEndRef = useRef(null)
   const chatWindowRef = useRef(null)
-  const canvasRef = useRef(null)
   const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
 
   // Particle system

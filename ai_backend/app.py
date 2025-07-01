@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from ultralytics import YOLO
 import torch
 from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
@@ -25,7 +26,7 @@ warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 CORS(app)
-
+port = int(os.environ.get("PORT", 5000))
 # MongoDB setup
 load_dotenv()
 MONGODB_URI = os.getenv('MONGODB_URI')
@@ -42,6 +43,14 @@ print("Loading models...")
 clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
+print("Loading YOLO model for object detection...")
+try:
+    yolo_model = YOLO('yolov8n.pt')  # Using nano version for speed
+    print("YOLO model loaded successfully!")
+except Exception as e:
+    print(f"Warning: Could not load YOLO model: {e}")
+    yolo_model = None
+
 # Pre-compute CLIP text embeddings for AI detection (one-time cost)
 AI_PROMPTS = [
     "artificial intelligence generated image", "computer generated artwork",
@@ -52,12 +61,23 @@ REAL_PROMPTS = [
     "camera captured photo", "genuine photograph"
 ]
 
+DUSTBIN_CLASSES = [
+    'trash can', 'garbage bin', 'waste basket', 'recycle bin', 
+    'dustbin', 'rubbish bin', 'bin', 'container'
+]
+
 print("Pre-computing CLIP text embeddings...")
 all_prompts = AI_PROMPTS + REAL_PROMPTS
 text_inputs = clip_processor(text=all_prompts, return_tensors="pt", padding=True)
 with torch.no_grad():
     PRECOMPUTED_TEXT_EMBEDDINGS = clip_model.get_text_features(**text_inputs)
     PRECOMPUTED_TEXT_EMBEDDINGS = PRECOMPUTED_TEXT_EMBEDDINGS / PRECOMPUTED_TEXT_EMBEDDINGS.norm(p=2, dim=-1, keepdim=True)
+
+print("Pre-computing dustbin detection embeddings...")
+dustbin_inputs = clip_processor(text=DUSTBIN_CLASSES, return_tensors="pt", padding=True)
+with torch.no_grad():
+    DUSTBIN_TEXT_EMBEDDINGS = clip_model.get_text_features(**dustbin_inputs)
+    DUSTBIN_TEXT_EMBEDDINGS = DUSTBIN_TEXT_EMBEDDINGS / DUSTBIN_TEXT_EMBEDDINGS.norm(p=2, dim=-1, keepdim=True)
 
 print("Models loaded successfully!")
 
@@ -87,7 +107,6 @@ def load_image_fast(source):
 @lru_cache(maxsize=128)
 def get_clip_embedding_cached(image_hash):
     """Cached CLIP embedding computation"""
-    # This is a placeholder - in practice, you'd need to implement proper caching
     pass
 
 def get_clip_embedding_fast(pil_image):
@@ -112,173 +131,113 @@ def get_image_features_batch(images):
         print(f"Error in batch processing: {str(e)}")
         raise
 
-# ==================== OPTIMIZED AI DETECTION ====================
+# ==================== DUSTBIN DETECTION ====================
 
-def analyze_statistical_properties_fast(img_array):
-    """Optimized statistical analysis"""
+def detect_dustbin_fast(pil_image):
+    """Optimized dustbin detection using YOLO + CLIP"""
     try:
-        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY) if len(img_array.shape) == 3 else img_array
-        
-        # Vectorized operations
-        mean_val = np.mean(gray)
-        std_val = np.std(gray)
-        
-        if std_val == 0:
-            return {"ai_probability": 0.5, "mean": float(mean_val), "std": 0.0}
-        
-        normalized = (gray - mean_val) / std_val
-        skewness = np.mean(normalized ** 3)
-        kurtosis = np.mean(normalized ** 4) - 3
-        
-        # Quick scoring
-        ai_score = 0
-        if std_val < 30: ai_score += 0.3
-        if abs(skewness) > 2: ai_score += 0.3
-        if abs(kurtosis) > 5: ai_score += 0.4
-        
-        return {
-            "ai_probability": min(ai_score, 1.0),
-            "mean": float(mean_val),
-            "std": float(std_val),
-            "skewness": float(skewness),
-            "kurtosis": float(kurtosis)
-        }
-    except Exception as e:
-        return {"ai_probability": 0.0, "error": str(e)}
-
-def analyze_frequency_domain_fast(img_array):
-    """Optimized frequency analysis"""
-    try:
-        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY) if len(img_array.shape) == 3 else img_array
-        
-        # Resize for faster FFT
-        if gray.shape[0] > 512 or gray.shape[1] > 512:
-            gray = cv2.resize(gray, (512, 512))
-        
-        fft = np.fft.fft2(gray)
-        magnitude = np.abs(np.fft.fftshift(fft))
-        
-        center_y, center_x = np.array(magnitude.shape) // 2
-        high_freq_region = magnitude[center_y-20:center_y+20, center_x-20:center_x+20]
-        
-        high_freq_power = np.sum(high_freq_region)
-        total_power = np.sum(magnitude)
-        ratio = high_freq_power / total_power if total_power > 0 else 0
-        
-        ai_probability = 0.7 if ratio < 0.1 else (0.6 if ratio > 0.8 else 0.0)
-        
-        return {
-            "ai_probability": ai_probability,
-            "high_freq_ratio": float(ratio)
-        }
-    except Exception as e:
-        return {"ai_probability": 0.0, "error": str(e)}
-
-def clip_based_ai_detection_fast(pil_image):
-    """Optimized CLIP-based AI detection using pre-computed embeddings"""
-    try:
-        # Get image embedding
-        image_inputs = clip_processor(images=pil_image, return_tensors="pt")
-        with torch.no_grad():
-            image_features = clip_model.get_image_features(**image_inputs)
-            image_features = image_features / image_features.norm(p=2)
-        
-        # Use pre-computed text embeddings
-        similarities = torch.nn.functional.cosine_similarity(
-            image_features.unsqueeze(1), PRECOMPUTED_TEXT_EMBEDDINGS.unsqueeze(0), dim=2
-        ).squeeze()
-        
-        ai_scores = similarities[:len(AI_PROMPTS)]
-        real_scores = similarities[len(AI_PROMPTS):]
-        
-        avg_ai_score = torch.mean(ai_scores).item()
-        avg_real_score = torch.mean(real_scores).item()
-        
-        total_score = avg_ai_score + avg_real_score
-        ai_probability = avg_ai_score / total_score if total_score > 0 else 0.5
-        
-        return {
-            "ai_probability": float(ai_probability),
-            "avg_ai_score": float(avg_ai_score),
-            "avg_real_score": float(avg_real_score)
-        }
-    except Exception as e:
-        return {"ai_probability": 0.0, "error": str(e)}
-
-def detect_ai_generated_fast(pil_image):
-    """Optimized AI detection with parallel processing"""
-    try:
-        img_array = np.array(pil_image)
-        
-        # Run analyses in parallel
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            future_stats = executor.submit(analyze_statistical_properties_fast, img_array)
-            future_freq = executor.submit(analyze_frequency_domain_fast, img_array)
-            future_clip = executor.submit(clip_based_ai_detection_fast, pil_image)
-            
-            stats_result = future_stats.result()
-            freq_result = future_freq.result()
-            clip_result = future_clip.result()
-        
-        # Weighted combination
-        combined_score = (
-            stats_result["ai_probability"] * 0.25 +
-            freq_result["ai_probability"] * 0.35 +
-            clip_result["ai_probability"] * 0.40
-        )
-        
-        return {
-            "is_ai_generated": combined_score > 0.6,
-            "confidence": combined_score,
-            "methods_used": ["statistical", "frequency", "clip"],
-            "details": {
-                "statistical": stats_result,
-                "frequency": freq_result,
-                "clip": clip_result
-            }
-        }
-    except Exception as e:
-        return {
-            "is_ai_generated": False,
+        results = {
+            "dustbin_detected": False,
             "confidence": 0.0,
+            "method": "none",
+            "details": {}
+        }
+        
+        # Method 1: YOLO object detection (primary)
+        if yolo_model is not None:
+            try:
+                # Convert PIL to numpy array for YOLO
+                img_array = np.array(pil_image)
+                
+                # Run YOLO detection
+                detections = yolo_model(img_array, verbose=False)[0]
+                
+                # Check for relevant object classes
+                dustbin_classes_yolo = [39, 73]  # bottle, book (closest matches in COCO)
+                # Note: COCO doesn't have direct dustbin class, so we check for containers
+                
+                max_conf = 0.0
+                for detection in detections.boxes.data:
+                    class_id = int(detection[5])
+                    confidence = float(detection[4])
+                    
+                    # Check for container-like objects with high confidence
+                    if class_id in dustbin_classes_yolo and confidence > 0.3:
+                        max_conf = max(max_conf, confidence)
+                
+                if max_conf > 0.3:
+                    results.update({
+                        "dustbin_detected": True,
+                        "confidence": max_conf,
+                        "method": "yolo",
+                        "details": {"yolo_confidence": max_conf}
+                    })
+                    return results
+                    
+                results["details"]["yolo_confidence"] = max_conf
+                
+            except Exception as e:
+                print(f"YOLO detection error: {e}")
+                results["details"]["yolo_error"] = str(e)
+        
+        # Method 2: CLIP-based detection (fallback)
+        try:
+            # Get image embedding
+            image_inputs = clip_processor(images=pil_image, return_tensors="pt")
+            with torch.no_grad():
+                image_features = clip_model.get_image_features(**image_inputs)
+                image_features = image_features / image_features.norm(p=2)
+            
+            # Compare with dustbin text embeddings
+            similarities = torch.nn.functional.cosine_similarity(
+                image_features.unsqueeze(1), DUSTBIN_TEXT_EMBEDDINGS.unsqueeze(0), dim=2
+            ).squeeze()
+            
+            max_similarity = torch.max(similarities).item()
+            best_match_idx = torch.argmax(similarities).item()
+            
+            # Threshold for dustbin detection
+            if max_similarity > 0.25:  # Adjust threshold as needed
+                results.update({
+                    "dustbin_detected": True,
+                    "confidence": max_similarity,
+                    "method": "clip",
+                    "details": {
+                        "clip_confidence": max_similarity,
+                        "best_match": DUSTBIN_CLASSES[best_match_idx]
+                    }
+                })
+                return results
+            
+            results["details"].update({
+                "clip_confidence": max_similarity,
+                "best_match": DUSTBIN_CLASSES[best_match_idx]
+            })
+            
+        except Exception as e:
+            print(f"CLIP dustbin detection error: {e}")
+            results["details"]["clip_error"] = str(e)
+        
+        return results
+        
+    except Exception as e:
+        return {
+            "dustbin_detected": False,
+            "confidence": 0.0,
+            "method": "none",
             "error": str(e)
         }
 
-# ==================== OPTIMIZED DUPLICATE DETECTION ====================
+# ==================== OPTIMIZED AI DETECTION ====================
+# ...existing code for analyze_statistical_properties_fast, analyze_frequency_domain_fast, clip_based_ai_detection_fast, detect_ai_generated_fast...
 
-def is_duplicate_fast(hash1, hash2, embedding1, embedding2, phash_threshold=5, clip_threshold=0.93):
-    """Combined duplicate detection"""
-    try:
-        # Quick pHash check first
-        if hash1 and hash2:
-            h1 = imagehash.hex_to_hash(hash1)
-            h2 = imagehash.hex_to_hash(hash2)
-            if abs(h1 - h2) <= phash_threshold:
-                return True, "phash", abs(h1 - h2)
-        
-        # CLIP similarity check
-        if embedding1 is not None and embedding2 is not None:
-            if isinstance(embedding1, list):
-                embedding1 = torch.tensor(embedding1)
-            if isinstance(embedding2, list):
-                embedding2 = torch.tensor(embedding2)
-            
-            sim = torch.nn.functional.cosine_similarity(
-                embedding1.unsqueeze(0), embedding2.unsqueeze(0)
-            ).item()
-            
-            if sim > clip_threshold:
-                return True, "clip", sim
-        
-        return False, None, 0.0
-    except Exception as e:
-        print(f"Duplicate detection error: {str(e)}")
-        return False, None, 0.0
+# ==================== OPTIMIZED DUPLICATE DETECTION ====================
+# ...existing code for is_duplicate_fast...
 
 # ==================== OPTIMIZED DATABASE OPERATIONS ====================
 
-def save_user_image_fast(user_id, image_url, mission_id, phash, clip_embedding, ai_result=None):
-    """Optimized database save"""
+def save_user_image_fast(user_id, image_url, mission_id, phash, clip_embedding, ai_result=None, dustbin_result=None):
+    """Optimized database save with dustbin info"""
     try:
         doc = {
             "user_id": user_id,
@@ -287,6 +246,7 @@ def save_user_image_fast(user_id, image_url, mission_id, phash, clip_embedding, 
             "phash": phash,
             "clip_embedding": clip_embedding.squeeze().tolist() if hasattr(clip_embedding, 'squeeze') else clip_embedding,
             "ai_detection": ai_result,
+            "dustbin_detection": dustbin_result,  # New field
             "created_at": datetime.utcnow(),
             "status": "active"
         }
@@ -310,24 +270,7 @@ def get_user_images_fast(user_id, limit=100):
         return []
 
 # ==================== OPTIMIZED FACE VERIFICATION ====================
-
-def verify_faces_fast(img1_path, img2_path):
-    """Optimized face verification"""
-    try:
-        result = DeepFace.verify(
-            img1_path=img1_path,
-            img2_path=img2_path,
-            model_name="VGG-Face",
-            detector_backend="opencv",  # Faster than mtcnn
-            enforce_detection=False  # Don't fail if face not detected
-        )
-        return {
-            "verified": result.get("verified", False),
-            "distance": result.get("distance"),
-            "threshold": result.get("threshold")
-        }
-    except Exception as e:
-        return {"verified": False, "error": str(e)}
+# ...existing code for verify_faces_fast...
 
 # ==================== MAIN API ENDPOINTS ====================
 
@@ -365,22 +308,35 @@ def comprehensive_check():
         print(f"Processing for user: {user_id}")
 
         # Parallel processing of image features
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=4) as executor:  # Changed from 3 to 4
             future_ai = executor.submit(detect_ai_generated_fast, current_img)
             future_phash = executor.submit(lambda: str(imagehash.phash(current_img)))
             future_clip = executor.submit(get_clip_embedding_fast, current_img)
+            future_dustbin = executor.submit(detect_dustbin_fast, current_img)  # New
             
             ai_result = future_ai.result()
             current_phash = future_phash.result()
             current_embedding = future_clip.result()
+            dustbin_result = future_dustbin.result()  # New
 
-        # Early AI rejection
+        # Early AI rejection (keep existing code)
         if ai_result["is_ai_generated"] and ai_result["confidence"] > 0.7:
             return jsonify({
                 "status": "rejected",
                 "reason": "ai_generated",
                 "ai_generated": True,
                 "ai_confidence": ai_result["confidence"],
+                "processing_time": time.time() - start_time
+            })
+
+        # Add dustbin check after AI check
+        if not dustbin_result["dustbin_detected"]:
+            return jsonify({
+                "status": "rejected",
+                "reason": "no_dustbin_detected",
+                "dustbin_detected": False,
+                "dustbin_confidence": dustbin_result["confidence"],
+                "dustbin_method": dustbin_result["method"],
                 "processing_time": time.time() - start_time
             })
 
@@ -437,7 +393,10 @@ def comprehensive_check():
         # Save approved image
         try:
             image_url_to_save = image_url if 'image_url' in locals() else f"uploaded_{uuid.uuid4().hex}"
-            saved_id = save_user_image_fast(user_id, image_url_to_save, mission_id, current_phash, current_embedding, ai_result)
+            saved_id = save_user_image_fast(
+                user_id, image_url_to_save, mission_id, 
+                current_phash, current_embedding, ai_result, dustbin_result
+            )
             
             return jsonify({
                 "status": "approved",
@@ -445,6 +404,9 @@ def comprehensive_check():
                 "saved_id": saved_id,
                 "ai_generated": ai_result["is_ai_generated"],
                 "ai_confidence": ai_result["confidence"],
+                "dustbin_detected": dustbin_result["dustbin_detected"],
+                "dustbin_confidence": dustbin_result["confidence"],
+                "dustbin_method": dustbin_result["method"],
                 "duplicate": False,
                 "face_verified": face_result.get("verified") if face_result else None,
                 "processing_time": time.time() - start_time
@@ -464,6 +426,24 @@ def comprehensive_check():
             "error": f"Internal server error: {str(e)}",
             "processing_time": time.time() - start_time
         }), 500
+
+@app.route("/detect_dustbin", methods=["POST"])
+def detect_dustbin_endpoint():
+    """Standalone dustbin detection endpoint"""
+    try:
+        data = request.json
+        image_url = data.get("image_url")
+        
+        if not image_url:
+            return jsonify({"error": "Missing image_url"}), 400
+        
+        current_img = load_image_fast(image_url)
+        dustbin_result = detect_dustbin_fast(current_img)
+        
+        return jsonify(dustbin_result)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/batch_check", methods=["POST"])
 def batch_check_optimized():
@@ -509,6 +489,17 @@ def batch_check_optimized():
                         })
                         continue
                     
+                    # Dustbin detection
+                    dustbin_result = detect_dustbin_fast(img)
+                    if not dustbin_result["dustbin_detected"]:
+                        results.append({
+                            "index": idx,
+                            "status": "rejected",
+                            "reason": "no_dustbin_detected",
+                            "dustbin_confidence": dustbin_result["confidence"]
+                        })
+                        continue
+
                     # Duplicate check
                     current_phash = str(imagehash.phash(img))
                     current_embedding = batch_embeddings[i]
@@ -535,7 +526,7 @@ def batch_check_optimized():
                     saved_id = save_user_image_fast(
                         user_id, img_data.get("image_url"),
                         img_data.get("mission_id", f"batch_{idx}"),
-                        current_phash, current_embedding, ai_result
+                        current_phash, current_embedding, ai_result, dustbin_result
                     )
                     
                     results.append({
@@ -576,6 +567,30 @@ def batch_check_optimized():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+def verify_faces_fast(img1_path, img2_path):
+    """
+    Fast face verification using DeepFace.
+    Returns a dict with 'verified' key.
+    """
+    try:
+        result = DeepFace.verify(
+            img1_path=img1_path,
+            img2_path=img2_path,
+            model_name="VGG-Face",
+            detector_backend="opencv",
+            enforce_detection=False
+        )
+        return {
+            "verified": result.get("verified", False),
+            "distance": result.get("distance"),
+            "threshold": result.get("threshold")
+        }
+    except Exception as e:
+        print(f"DeepFace verification error: {e}")
+        return {"verified": False, "error": str(e)}
 
 # ==================== SIMPLIFIED UTILITY ENDPOINTS ====================
 def to_native(obj):
@@ -719,5 +734,5 @@ if __name__ == "__main__":
     print("✓ Batch processing support")
     print("✓ Efficient database operations")
     print("="*50)
-    
-    app.run(debug=False, port=5000, host='0.0.0.0', threaded=True)
+
+    app.run(debug=False, port=port, host='0.0.0.0', threaded=True)
