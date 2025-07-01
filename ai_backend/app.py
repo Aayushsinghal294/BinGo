@@ -26,7 +26,7 @@ warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 CORS(app)
-
+port = int(os.environ.get("PORT", 5000))
 # MongoDB setup
 load_dotenv()
 MONGODB_URI = os.getenv('MONGODB_URI')
@@ -734,5 +734,5 @@ if __name__ == "__main__":
     print("✓ Batch processing support")
     print("✓ Efficient database operations")
     print("="*50)
-    
-    app.run(debug=False, port=5000, host='0.0.0.0', threaded=True)
+
+    app.run(debug=False, port=port, host='0.0.0.0', threaded=True)
