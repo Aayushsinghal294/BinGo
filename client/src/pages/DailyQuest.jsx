@@ -13,12 +13,16 @@ const DailyQuest = () => {
   const [started, setStarted] = useState(false);
   const [rewardClaimed, setRewardClaimed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-const percentage = (score !== null && questions.length > 0)
-  ? (score / questions.length) * 100
-  : 0;
+  const [loadingQuestions, setLoadingQuestions] = useState(true); // <-- Add this
+
+  const percentage = (score !== null && questions.length > 0)
+    ? (score / questions.length) * 100
+    : 0;
+
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
+        setLoadingQuestions(true); // Start loading
         const token = await getToken();
         if (!token) throw new Error('Unauthorized. Please log in.');
 
@@ -35,7 +39,8 @@ const percentage = (score !== null && questions.length > 0)
           const data = await res.json();
           if (data.alreadySubmitted && typeof data.score === 'number') {
             setScore(data.score);
-            setStarted(true); // Important: Set started to true to show score screen
+            setStarted(true);
+            setLoadingQuestions(false); // Stop loading
             return;
           }
           throw new Error('Already submitted today or unauthorized.');
@@ -48,6 +53,8 @@ const percentage = (score !== null && questions.length > 0)
         setAnswers(new Array(data.questions?.length || 5).fill(null)); // Pre-initialize answers array
       } catch (err) {
         setError(err.message || 'Error fetching questions.');
+      } finally {
+        setLoadingQuestions(false); // Stop loading
       }
     };
 
