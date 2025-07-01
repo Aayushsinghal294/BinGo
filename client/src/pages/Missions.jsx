@@ -233,11 +233,11 @@ refreshUserData();
     })
     const dustbinData = await dustbinRes.json()
     if (!dustbinData.dustbin_detected) {
-      setError("🗑️ No dustbin or accepted object detected!\n\nPlease ensure a dustbin, bucket, bottle, cup, or similar object is clearly visible in your photo.")
+      setError("🗑️ No dustbin detected!\n\nPlease ensure a dustbin or similar object is clearly visible in your photo.")
       setUploadStatus('')
       setLoading(false)
       return
-    }
+    } 
 
       // Step 1: AI Detection
       setUploadStatus('Running AI detection...')
