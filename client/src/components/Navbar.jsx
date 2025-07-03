@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { MenuIcon, GiftIcon, XIcon } from 'lucide-react'
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
 
-
+const SERVER_URL = import.meta.env.VITE_SERVER_URL
 const Navbar = () => {
 const [isOpen, setIsOpen] = useState(false)
 const { user } = useUser()
@@ -12,7 +12,7 @@ const navigate = useNavigate()
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:4000/api/missions/user/${user.id}`, {
+      fetch(`${SERVER_URL}/api/missions/user/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

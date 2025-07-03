@@ -9,7 +9,7 @@ import { useUserData } from '../context/userDataContext'
 import { completeMission } from '../services/MissionsService'
 const CLOUDINARY_UPLOAD_PRESET = 'BinGo_CodePaglus'
 const CLOUDINARY_CLOUD_NAME = 'dgclo6bft'
-const BACKEND_URL = import.meta.env.BACKEND_URL|| 'http://127.0.0.1:5000'
+const BACKEND_URL = import.meta.env.AI_BACKEND_URL|| 'http://127.0.0.1:5000'
 
 const missionIcons = {
   "Dispose Waste": <CameraIcon className="w-6 h-6 text-emerald-400" />,

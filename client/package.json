@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.10.0",
     "clsx": "^2.1.1",
+    "dotenv": "^17.0.1",
     "framer-motion": "^12.18.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.517.0",

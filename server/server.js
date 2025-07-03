@@ -17,7 +17,10 @@ const app = express()
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',   
+  origin: [
+    'http://bingofrontend2.s3-website.ap-south-1.amazonaws.com',
+    'http://localhost:5173'
+  ],
   credentials: true                  
 }))
 
