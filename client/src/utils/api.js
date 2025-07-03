@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.BACKEND_URL || 'http://localhost:5000/api'
+  baseURL: import.meta.env.AI_BACKEND_URL || 'http://localhost:5000/api'
 });
 
 // If you store token in localStorage:

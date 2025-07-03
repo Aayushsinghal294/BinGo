@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useUser } from "@clerk/clerk-react";
-const API_URL = 'http://localhost:4000/api/missions'
+const SERVER_URL = import.meta.env.VITE_SERVER_URL
+const API_URL = `${SERVER_URL}/api/missions`
 
 const UserDataContext = createContext();
 
