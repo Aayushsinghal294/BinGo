@@ -329,11 +329,11 @@ export default function SignInPage() {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse delay-500"></div>
-              <span>Eco Rewards</span>
+              <span>Earn Rewards</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse delay-1000"></div>
-              <span>Join 5k+ Users</span>
+              <span>Dispose Waste</span>
             </div>
           </div>
         </motion.div>
