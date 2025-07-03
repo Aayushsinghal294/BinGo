@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Crown, Star } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
-
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 export default function Leaderboard() {
   const { user } = useUser();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/leaderboard')
+    fetch(`${SERVER_URL}/api/leaderboard`)
       .then(r => r.json())
       .then(({ users }) => setUsers(users))
       .finally(() => setLoading(false));

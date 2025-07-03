@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:4000/api/missions'
+const SERVER_URL = import.meta.env.VITE_SERVER_URL
+const API_URL = `${SERVER_URL}/api/missions`
 export const fetchMissions = async () => {
   const res = await fetch(`${API_URL}/missions`)
   return res.json()

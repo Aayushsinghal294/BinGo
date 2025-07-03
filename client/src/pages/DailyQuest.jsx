@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
-
+const SERVER_URL = import.meta.env.VITE_SERVER_URL
 const DailyQuest = () => {
   const { isLoaded, user } = useUser();
   const { getToken } = useAuth();
@@ -26,7 +26,7 @@ const DailyQuest = () => {
         const token = await getToken();
         if (!token) throw new Error('Unauthorized. Please log in.');
 
-        const res = await fetch('http://localhost:4000/api/daily-quest', {
+        const res = await fetch(`${SERVER_URL}/api/daily-quest`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`
@@ -74,7 +74,7 @@ const DailyQuest = () => {
     try {
       const token = await getToken();
 
-      const res = await fetch('http://localhost:4000/api/daily-quest', {
+      const res = await fetch(`${SERVER_URL}/api/daily-quest`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

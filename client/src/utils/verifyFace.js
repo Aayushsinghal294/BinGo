@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const FLASK_API_URL = import.meta.env.BACKEND_URL || 'http://127.0.0.1:5000'
+const FLASK_API_URL = import.meta.env.AI_BACKEND_URL || 'http://127.0.0.1:5000'
 
 export const verifyFace = async (profileImageUrl, proofFile) => {
   try {
