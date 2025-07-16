@@ -72,6 +72,7 @@ BinGo is a smart waste management platform that leverages AI, gamification, and 
 
 ## 👥 Contributors
 
+- **Manbir Singh** - Full Stack Developer & AI Integration - https://github.com/Aayushsinghal294
 - **Mayank Jain** – Full Stack Developer & AI Integration -  https://github.com/Mayankjain2624
 - **Manbir Singh** - Full Stack Developer & AI Integration - https://github.com/ManbirS07
 
