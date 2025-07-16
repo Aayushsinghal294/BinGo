@@ -1,3 +1,4 @@
+
 # ♻️ BinGo – AI-Powered Waste Disposal Verification & Gamification App
 
 BinGo is a smart waste management platform that leverages AI, gamification, and geospatial data to encourage responsible civic behavior. Users earn rewards for verified waste disposal, locate nearby public dustbins, and compete in local eco-challenges.
@@ -58,7 +59,8 @@ BinGo is a smart waste management platform that leverages AI, gamification, and 
 5. **Leaderboard + Map View**  
    Users can see public leaderboard and navigate to nearby bins.
 
-
+**code visualization-**
+<img width="5664" height="1212" alt="diagram (3)" src="https://github.com/user-attachments/assets/748eaa75-f410-4aee-8e92-d252bf3f2167" />
 
 ## 🧪 Future Enhancements
 
