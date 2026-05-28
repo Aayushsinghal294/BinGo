@@ -30,10 +30,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
+const requireDbConnection = (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ error: 'Database unavailable' })
+  }
+  next()
+}
+
 // MongoDB connection with better error handling
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
 })
 .then(() => {
   console.log('MongoDB connected successfully')
@@ -41,7 +47,7 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .catch(err => {
   console.error('MongoDB connection error:', err)
-  process.exit(1)
+  console.warn('Continuing without database connectivity so the API can still start')
 })
 
 // MongoDB connection event handlers
@@ -56,11 +62,11 @@ mongoose.connection.on('disconnected', () => {
 // Routes
 app.use('/api/chat', chatRoutes(genAI))
 app.use('/api/analyze-image', analyzeImageRoutes(genAI))
-app.use('/api/dustbins', dustbinRoutes)
+app.use('/api/dustbins', requireDbConnection, dustbinRoutes)
 app.use('/api/missions', missionsRouter)
 app.use('/api/daily-quest', dailyQuestRoutes);
-app.use('/api/rewards', rewardsRoute)
-app.use('/api/leaderboard', leaderboardRoutes)
+app.use('/api/rewards', requireDbConnection, rewardsRoute)
+app.use('/api/leaderboard', requireDbConnection, leaderboardRoutes)
 
 
 // Health check endpoint with enhanced info
