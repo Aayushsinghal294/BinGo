@@ -27,8 +27,9 @@ const vercelRegex = /^https?:\/\/([a-z0-9-]+\.)?vercel\.app$/
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true)
-    if (allowedOrigins.includes(origin)) return callback(null, true)
-    if (vercelRegex.test(origin)) return callback(null, true)
+    const incoming = origin.replace(/\/$/, '')
+    if (allowedOrigins.includes(incoming)) return callback(null, true)
+    if (/\.vercel\.app$/.test(incoming)) return callback(null, true)
     return callback(new Error('CORS not allowed for this origin'))
   },
   credentials: true
