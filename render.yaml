@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: bingo-server
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: MONGO_URI
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GEMINI_CHAT_MODEL
+        sync: false
+      - key: GEMINI_IMAGE_MODEL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: MAX_REQUESTS_PER_MINUTE
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false

@@ -16,11 +16,18 @@ dotenv.config()
 const app = express()
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+].filter(Boolean)
+
 app.use(cors({
-  origin: [
-    'http://bingofrontend2.s3-website.ap-south-1.amazonaws.com',
-    'http://localhost:5173'
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+    return callback(new Error('CORS not allowed for this origin'))
+  },
   credentials: true                  
 }))
 
@@ -43,7 +50,8 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => {
   console.log('MongoDB connected successfully')
-  console.log('Database:', mongoose.connection.db.databaseName)
+  const dbName = mongoose.connection.name || mongoose.connection.db?.databaseName || 'unknown'
+  console.log('Database:', dbName)
 })
 .catch(err => {
   console.error('MongoDB connection error:', err)
