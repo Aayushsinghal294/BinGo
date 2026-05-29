@@ -16,19 +16,23 @@ dotenv.config()
 const app = express()
 
 // Middleware
+const normalizedFrontend = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : undefined
 const allowedOrigins = [
   'http://localhost:5173',
-  process.env.FRONTEND_URL,
+  normalizedFrontend,
 ].filter(Boolean)
+
+const vercelRegex = /^https?:\/\/([a-z0-9-]+\.)?vercel\.app$/
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true)
-    }
+    if (!origin) return callback(null, true)
+    const incoming = origin.replace(/\/$/, '')
+    if (allowedOrigins.includes(incoming)) return callback(null, true)
+    if (/\.vercel\.app$/.test(incoming)) return callback(null, true)
     return callback(new Error('CORS not allowed for this origin'))
   },
-  credentials: true                  
+  credentials: true
 }))
 
 app.use(express.json({ limit: '10mb' }))
