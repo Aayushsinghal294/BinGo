@@ -1,6 +1,29 @@
 import Chat from '../models/Chat.js'
+import { generateWithFallback } from '../utils/genaiClient.js'
 
 const SYSTEM_PROMPT = `You are BinGo Assistant, a helpful AI assistant specialized in waste management and environmental topics. ...` // (same as above)
+
+const IMAGE_MODEL_CANDIDATES = [
+  process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash'
+].filter(Boolean)
+
+const getImageModel = (genAI) => {
+  const errors = []
+
+  for (const modelName of IMAGE_MODEL_CANDIDATES) {
+    try {
+      return { model: genAI.getGenerativeModel({ model: modelName }), modelName }
+    } catch (error) {
+      errors.push(`${modelName}: ${error.message}`)
+    }
+  }
+
+  const message = errors.length
+    ? `No supported Gemini model could be loaded for image analysis. Tried: ${errors.join(' | ')}`
+    : 'No Gemini model names were configured for image analysis'
+
+  throw new Error(message)
+}
 
 export const handleImageAnalysis = (genAI) => async (req, res) => {
   try {
@@ -10,7 +33,7 @@ export const handleImageAnalysis = (genAI) => async (req, res) => {
       return res.status(400).json({ error: 'Image data is required' })
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const modelCandidates = IMAGE_MODEL_CANDIDATES
 
     const prompt = `Analyze this waste item image and provide a detailed response covering:
 
@@ -30,8 +53,19 @@ Please be concise but informative, and focus on practical waste management advic
       }
     }
 
-    const result = await model.generateContent([prompt, imagePart])
-    const analysis = result.response.text()
+    let analysis = null
+    let generationError = null
+    let usedModel = null
+
+    try {
+      const { result, modelName } = await generateWithFallback(genAI, modelCandidates, [prompt, imagePart])
+      usedModel = modelName
+      analysis = result.response.text()
+    } catch (error) {
+      generationError = error
+      console.warn('All Gemini image generation attempts failed:', error && error.message)
+      analysis = 'I could not reach Gemini for image analysis right now. Please try again, or upload a clearer image of the item.'
+    }
 
     let chat = await Chat.findOne({ sessionId })
     if (!chat) {
@@ -47,7 +81,7 @@ Please be concise but informative, and focus on practical waste management advic
     )
     await chat.save()
 
-    res.json({ analysis })
+    res.json({ analysis, model: usedModel, fallback: Boolean(generationError) })
   } catch (error) {
     console.error('Image analysis error:', error)
     res.status(500).json({

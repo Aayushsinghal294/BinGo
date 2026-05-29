@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Bot, X, Send, Paperclip, RotateCcw, Sparkles, Leaf, Recycle } from 'lucide-react'
 
 const ChatbotButton = () => {
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([
     {
@@ -115,9 +116,7 @@ const ChatbotButton = () => {
     setLoading(true)
     setError(null)
     try {
-      const API_BASE = import.meta.env.PROD
-        ? 'https://your-production-api.com'
-        : '/api'
+      const API_BASE = `${SERVER_URL}/api`
 
       if (selectedImage) {
         const userMsg = {

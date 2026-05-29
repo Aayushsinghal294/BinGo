@@ -160,7 +160,7 @@ app.use((req, res) => {
 })
 
 const PORT = process.env.PORT || 4000
-
+console.log("Gemini key loaded:", process.env.GOOGLE_API_KEY ? "YES" : "NO")
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
   console.log(`BinGo Assistant API ready`)
