@@ -16,11 +16,18 @@ dotenv.config()
 const app = express()
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+].filter(Boolean)
+
 app.use(cors({
-  origin: [
-    'http://bingofrontend2.s3-website.ap-south-1.amazonaws.com',
-    'http://localhost:5173'
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+    return callback(new Error('CORS not allowed for this origin'))
+  },
   credentials: true                  
 }))
 
@@ -30,18 +37,25 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY)
 
+const requireDbConnection = (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ error: 'Database unavailable' })
+  }
+  next()
+}
+
 // MongoDB connection with better error handling
 mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
 })
 .then(() => {
   console.log('MongoDB connected successfully')
-  console.log('Database:', mongoose.connection.db.databaseName)
+  const dbName = mongoose.connection.name || mongoose.connection.db?.databaseName || 'unknown'
+  console.log('Database:', dbName)
 })
 .catch(err => {
   console.error('MongoDB connection error:', err)
-  process.exit(1)
+  console.warn('Continuing without database connectivity so the API can still start')
 })
 
 // MongoDB connection event handlers
@@ -56,11 +70,11 @@ mongoose.connection.on('disconnected', () => {
 // Routes
 app.use('/api/chat', chatRoutes(genAI))
 app.use('/api/analyze-image', analyzeImageRoutes(genAI))
-app.use('/api/dustbins', dustbinRoutes)
+app.use('/api/dustbins', requireDbConnection, dustbinRoutes)
 app.use('/api/missions', missionsRouter)
 app.use('/api/daily-quest', dailyQuestRoutes);
-app.use('/api/rewards', rewardsRoute)
-app.use('/api/leaderboard', leaderboardRoutes)
+app.use('/api/rewards', requireDbConnection, rewardsRoute)
+app.use('/api/leaderboard', requireDbConnection, leaderboardRoutes)
 
 
 // Health check endpoint with enhanced info
@@ -154,7 +168,7 @@ app.use((req, res) => {
 })
 
 const PORT = process.env.PORT || 4000
-
+console.log("Gemini key loaded:", process.env.GOOGLE_API_KEY ? "YES" : "NO")
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
   console.log(`BinGo Assistant API ready`)

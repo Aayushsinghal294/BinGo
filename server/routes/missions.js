@@ -1,4 +1,5 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import User from '../models/User.js'
 import Mission, { DEFAULT_MISSIONS } from '../models/Mission.js'
 
@@ -9,8 +10,30 @@ let cachedMissions = null
 let cacheExpiry = null
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
+const ensureDbConnection = async () => {
+  if (mongoose.connection.readyState === 1) {
+    return true
+  }
+
+  if (!process.env.MONGO_URI) {
+    return false
+  }
+
+  try {
+    await mongoose.connect(process.env.MONGO_URI)
+    return mongoose.connection.readyState === 1
+  } catch {
+    return false
+  }
+}
+
 // Initialize default missions in database
 const initializeMissions = async () => {
+  const connected = await ensureDbConnection()
+  if (!connected) {
+    return
+  }
+
   try {
     const count = await Mission.countDocuments()
     if (count === 0) {
@@ -24,6 +47,11 @@ const initializeMissions = async () => {
 
 // Get cached missions or fetch from DB
 const getActiveMissions = async () => {
+  const connected = await ensureDbConnection()
+  if (!connected) {
+    return DEFAULT_MISSIONS
+  }
+
   const now = Date.now()
   
   if (cachedMissions && cacheExpiry && now < cacheExpiry) {
@@ -62,6 +90,11 @@ initializeMissions()
 // Get user profile and missions
 router.get('/user/:clerkId', validateClerkId, async (req, res) => {
   try {
+    const connected = await ensureDbConnection()
+    if (!connected) {
+      return res.status(503).json({ error: 'Database unavailable' })
+    }
+
     const { clerkId } = req.params
     
     const [userData, missions] = await Promise.all([
@@ -96,6 +129,11 @@ router.get('/user/:clerkId', validateClerkId, async (req, res) => {
 })
 router.put('/user/:clerkId', validateClerkId, async (req, res) => {
   try {
+    const connected = await ensureDbConnection()
+    if (!connected) {
+      return res.status(503).json({ error: 'Database unavailable' })
+    }
+
     const { clerkId } = req.params
     const { email, name, profileImage } = req.body
 
@@ -150,6 +188,11 @@ router.put('/user/:clerkId', validateClerkId, async (req, res) => {
 // Complete a mission
 router.post('/complete/:clerkId/:missionId', validateClerkId, async (req, res) => {
   try {
+    const connected = await ensureDbConnection()
+    if (!connected) {
+      return res.status(503).json({ error: 'Database unavailable' })
+    }
+
     const { clerkId, missionId } = req.params
     const { proofUrl, missionType } = req.body
     const parsedMissionId = parseInt(missionId)
@@ -253,6 +296,11 @@ const checkAchievements = (user) => {
 // Get leaderboard
 router.get('/leaderboard', async (req, res) => {
   try {
+    const connected = await ensureDbConnection()
+    if (!connected) {
+      return res.status(503).json({ error: 'Database unavailable' })
+    }
+
     const limit = Math.min(parseInt(req.query.limit) || 50, 100) // Cap at 100
     
     const users = await User.find({}, {
