@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { MapPin as MapPinIcon, Camera as CameraIcon, CheckCircle as CheckCircleIcon, XCircle as XCircleIcon, ArrowLeft as ArrowLeftIcon, Sparkles as SparklesIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { apiUrl } from '../config/api'
 
 const SuggestBin = () => {
   const navigate = useNavigate()
@@ -94,7 +95,7 @@ const SuggestBin = () => {
       formData.append('addedBy', userId)
       formData.append('addedByName', userName)
       formData.append('image', image)
-      const response = await fetch('/api/dustbins', {
+      const response = await fetch(apiUrl('/api/dustbins'), {
         method: 'POST',
         body: formData
       })

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { MapPin as MapPinIcon, Heart as HeartIcon, Flag as FlagIcon, Trash2 as TrashIcon, User as UserIcon, Calendar as CalendarIcon, ArrowLeft as ArrowLeftIcon, Sparkles as SparklesIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { apiUrl } from '../config/api'
 
 const DustbinMap = () => {
   const navigate = useNavigate()
@@ -37,22 +38,32 @@ const DustbinMap = () => {
     }
   }
 
-  const fetchDustbins = async () => {
-    try {
-      const response = await fetch('/api/dustbins')
-      if (response.ok) {
-        const data = await response.json()
-        setDustbins(data)
-      }
-    } catch (error) {
-      console.error('Error fetching dustbins:', error)
+const fetchDustbins = async () => {
+  try {
+    // Cleaned up the log to use your actual utility output
+    console.log("Targeting Dustbin API Endpoint:", apiUrl('/api/dustbins'));
+
+    const response = await fetch(apiUrl('/api/dustbins'));
+    const text = await response.text();
+
+    console.log("Dustbin response preview:", text.slice(0, 100));
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${text}`);
     }
-    setLoading(false)
+
+    const data = JSON.parse(text);
+    setDustbins(data);
+  } catch (error) {
+    console.error('Error fetching dustbins:', error);
   }
+  setLoading(false);
+}
 
   const handleLike = async (dustbinId) => {
     try {
-      const response = await fetch(`/api/dustbins/${dustbinId}/like`, {
+      const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+      const response = await fetch(apiUrl(`/api/dustbins/${dustbinId}/like`), {
         method: 'POST'
       })
       if (response.ok) {
@@ -72,7 +83,8 @@ const DustbinMap = () => {
   const handleReport = async (dustbinId) => {
     if (window.confirm('Are you sure you want to report this dustbin?')) {
       try {
-        const response = await fetch(`/api/dustbins/${dustbinId}/report`, {
+        const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+        const response = await fetch(apiUrl(`/api/dustbins/${dustbinId}/report`), {
           method: 'POST'
         })
         if (response.ok) {
@@ -88,7 +100,8 @@ const DustbinMap = () => {
   const handleDelete = async (dustbinId) => {
     if (window.confirm('Are you sure you want to delete this dustbin?')) {
       try {
-        const response = await fetch(`/api/dustbins/${dustbinId}`, {
+        const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+        const response = await fetch(apiUrl(`/api/dustbins/${dustbinId}`), {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
