@@ -37,19 +37,27 @@ const DustbinMap = () => {
     }
   }
 
-  const fetchDustbins = async () => {
-    try {
-      const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
-      const response = await fetch(`${API_BASE}/api/dustbins`)
-      if (response.ok) {
-        const data = await response.json()
-        setDustbins(data)
-      }
-    } catch (error) {
-      console.error('Error fetching dustbins:', error)
+const fetchDustbins = async () => {
+  try {
+    const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+    console.log("Dustbin API URL:", `${API_BASE}/api/dustbins`)
+
+    const response = await fetch(`${API_BASE}/api/dustbins`)
+    const text = await response.text()
+
+    console.log("Dustbin response:", text.slice(0, 100))
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${text}`)
     }
-    setLoading(false)
+
+    const data = JSON.parse(text)
+    setDustbins(data)
+  } catch (error) {
+    console.error('Error fetching dustbins:', error)
   }
+  setLoading(false)
+}
 
   const handleLike = async (dustbinId) => {
     try {
