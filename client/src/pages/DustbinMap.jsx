@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { MapPin as MapPinIcon, Heart as HeartIcon, Flag as FlagIcon, Trash2 as TrashIcon, User as UserIcon, Calendar as CalendarIcon, ArrowLeft as ArrowLeftIcon, Sparkles as SparklesIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { apiUrl } from '../config/api'
 
 const DustbinMap = () => {
   const navigate = useNavigate()
@@ -40,9 +41,9 @@ const DustbinMap = () => {
 const fetchDustbins = async () => {
   try {
     const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
-    console.log("Dustbin API URL:", `${API_BASE}/api/dustbins`)
+    console.log("Dustbin API URL:", `${API_BASE}('/api/dustbins`)
 
-    const response = await fetch(`${API_BASE}/api/dustbins`)
+    const response = await fetch(apiUrl('/api/dustbins'))
     const text = await response.text()
 
     console.log("Dustbin response:", text.slice(0, 100))
@@ -62,7 +63,7 @@ const fetchDustbins = async () => {
   const handleLike = async (dustbinId) => {
     try {
       const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
-      const response = await fetch(`${API_BASE}/api/dustbins/${dustbinId}/like`, {
+      const response = await fetch(apiUrl(`/api/dustbins/${dustbinId}/like`), {
         method: 'POST'
       })
       if (response.ok) {
@@ -83,7 +84,7 @@ const fetchDustbins = async () => {
     if (window.confirm('Are you sure you want to report this dustbin?')) {
       try {
         const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
-        const response = await fetch(`${API_BASE}/api/dustbins/${dustbinId}/report`, {
+        const response = await fetch(apiUrl(`/api/dustbins/${dustbinId}/report`), {
           method: 'POST'
         })
         if (response.ok) {
@@ -100,7 +101,7 @@ const fetchDustbins = async () => {
     if (window.confirm('Are you sure you want to delete this dustbin?')) {
       try {
         const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
-        const response = await fetch(`${API_BASE}/api/dustbins/${dustbinId}`, {
+        const response = await fetch(apiUrl(`/api/dustbins/${dustbinId}`), {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
