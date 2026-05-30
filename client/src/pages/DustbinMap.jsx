@@ -39,7 +39,8 @@ const DustbinMap = () => {
 
   const fetchDustbins = async () => {
     try {
-      const response = await fetch('/api/dustbins')
+      const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+      const response = await fetch(`${API_BASE}/api/dustbins`)
       if (response.ok) {
         const data = await response.json()
         setDustbins(data)
@@ -52,7 +53,8 @@ const DustbinMap = () => {
 
   const handleLike = async (dustbinId) => {
     try {
-      const response = await fetch(`/api/dustbins/${dustbinId}/like`, {
+      const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+      const response = await fetch(`${API_BASE}/api/dustbins/${dustbinId}/like`, {
         method: 'POST'
       })
       if (response.ok) {
@@ -72,7 +74,8 @@ const DustbinMap = () => {
   const handleReport = async (dustbinId) => {
     if (window.confirm('Are you sure you want to report this dustbin?')) {
       try {
-        const response = await fetch(`/api/dustbins/${dustbinId}/report`, {
+        const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+        const response = await fetch(`${API_BASE}/api/dustbins/${dustbinId}/report`, {
           method: 'POST'
         })
         if (response.ok) {
@@ -88,7 +91,8 @@ const DustbinMap = () => {
   const handleDelete = async (dustbinId) => {
     if (window.confirm('Are you sure you want to delete this dustbin?')) {
       try {
-        const response = await fetch(`/api/dustbins/${dustbinId}`, {
+        const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+        const response = await fetch(`${API_BASE}/api/dustbins/${dustbinId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'

@@ -94,7 +94,8 @@ const SuggestBin = () => {
       formData.append('addedBy', userId)
       formData.append('addedByName', userName)
       formData.append('image', image)
-      const response = await fetch('/api/dustbins', {
+      const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+      const response = await fetch(`${API_BASE}/api/dustbins`, {
         method: 'POST',
         body: formData
       })
