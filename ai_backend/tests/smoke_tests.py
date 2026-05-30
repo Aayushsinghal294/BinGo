@@ -3,7 +3,7 @@ import tempfile
 import os
 import sys
 
-BASE = "http://127.0.0.1:5000"
+BASE = "https://ayush133-bingo.hf.space"
 HEADERS = {"Content-Type": "application/json"}
 
 # Sample images (public URLs)
