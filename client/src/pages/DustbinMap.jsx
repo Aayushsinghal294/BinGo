@@ -40,24 +40,24 @@ const DustbinMap = () => {
 
 const fetchDustbins = async () => {
   try {
-    const API_BASE = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
-    console.log("Dustbin API URL:", `${API_BASE}('/api/dustbins`)
+    // Cleaned up the log to use your actual utility output
+    console.log("Targeting Dustbin API Endpoint:", apiUrl('/api/dustbins'));
 
-    const response = await fetch(apiUrl('/api/dustbins'))
-    const text = await response.text()
+    const response = await fetch(apiUrl('/api/dustbins'));
+    const text = await response.text();
 
-    console.log("Dustbin response:", text.slice(0, 100))
+    console.log("Dustbin response preview:", text.slice(0, 100));
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${text}`)
+      throw new Error(`HTTP ${response.status}: ${text}`);
     }
 
-    const data = JSON.parse(text)
-    setDustbins(data)
+    const data = JSON.parse(text);
+    setDustbins(data);
   } catch (error) {
-    console.error('Error fetching dustbins:', error)
+    console.error('Error fetching dustbins:', error);
   }
-  setLoading(false)
+  setLoading(false);
 }
 
   const handleLike = async (dustbinId) => {
